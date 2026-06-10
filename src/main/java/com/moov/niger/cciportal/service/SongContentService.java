@@ -16,26 +16,26 @@ public class SongContentService {
     public List<SongResponse> getAllSongs() {
 
         String sql = """
-            SELECT
-                id,
-                song_code,
-                song_name,
-                genre,
-                duration,
-                upload_date
-            FROM song_content
-            """;
+        SELECT
+            tone_code,
+            tone_name,
+            category,
+            update_time
+        FROM tbl_tone_catalogue
+        """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
 
             SongResponse dto = new SongResponse();
 
-            dto.setId(rs.getLong("id"));
-            dto.setSongCode(rs.getString("song_code"));
-            dto.setSongName(rs.getString("song_name"));
-            dto.setDuration(rs.getInt("duration"));
-            dto.setGenre(rs.getString("genre"));
-            dto.setUploadDate(rs.getTimestamp("upload_date").toLocalDateTime());
+            dto.setToneCode(rs.getString("tone_code"));
+            dto.setToneName(rs.getString("tone_name"));
+            dto.setCategory(rs.getString("category"));
+
+            dto.setUpdateTime(
+                    rs.getTimestamp("update_time")
+                            .toLocalDateTime()
+            );
 
             return dto;
         });

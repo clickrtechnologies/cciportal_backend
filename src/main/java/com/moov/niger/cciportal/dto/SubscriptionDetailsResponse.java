@@ -16,7 +16,7 @@ public class SubscriptionDetailsResponse {
     private String productId;
     private String lang;
     private String toneCode;
-    private String songName;
+    private String toneName;
     private String packName;
     private Byte status;
     private String userStatus;

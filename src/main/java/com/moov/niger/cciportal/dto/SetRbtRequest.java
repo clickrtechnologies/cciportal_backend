@@ -6,7 +6,7 @@ import lombok.Data;
 public class SetRbtRequest {
 
     private Long msisdn;
-    private String songCode;
-    private String songName;
+    private String toneCode;
+    private String toneName;
     private String packName;
 }

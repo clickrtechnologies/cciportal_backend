@@ -17,16 +17,15 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
         ts.product_id,
         ts.lang,
         ts.toneCode,
-        sc.song_name,
+        tc.tone_name,
         ts.pack_name,
         ts.status,
         ts.user_status,
         ts.billing_date,
         ts.renew_date
     FROM tbl_subscription ts
-    LEFT JOIN song_content sc
-        ON ts.toneCode COLLATE utf8mb4_general_ci =
-           sc.song_code COLLATE utf8mb4_general_ci
+            LEFT JOIN tbl_tone_catalogue tc
+            ON ts.toneCode = tc.tone_code
     WHERE ts.msisdn = :msisdn
     """,
             nativeQuery = true)

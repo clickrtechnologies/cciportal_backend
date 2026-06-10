@@ -48,7 +48,7 @@ public class SubscriptionService {
         response.setProductId(String.valueOf(row[4]));
         response.setLang(String.valueOf(row[5]));
         response.setToneCode(String.valueOf(row[6]));
-        response.setSongName(String.valueOf(row[7]));
+        response.setToneName(String.valueOf(row[7]));
         response.setPackName(String.valueOf(row[8]));
         response.setStatus(((Number) row[9]).byteValue());
         response.setUserStatus(String.valueOf(row[10]));
@@ -95,7 +95,7 @@ public class SubscriptionService {
 
         procedure.setParameter("IN_ANI", request.getMsisdn());
         procedure.setParameter("IN_PID", request.getPackName());
-        procedure.setParameter("IN_TONECODE", request.getSongCode());
+        procedure.setParameter("IN_TONECODE", request.getToneCode());
         procedure.setParameter("IN_REQMODE", "IVR");
         procedure.setParameter("IN_LANG", "fr");
         procedure.setParameter("IN_ACTION", "S");
@@ -109,14 +109,12 @@ public class SubscriptionService {
                         .orElseThrow(() ->
                                 new RuntimeException("Subscription not found"));
 
-        subscription.setToneCode(request.getSongCode());
+        subscription.setToneCode(request.getToneCode());
 
         subscription.setBillingDate(now);
         subscription.setRenewDate(renewDate);
         subscription.setReqDate(now);
 
-        subscription.setStatus((byte) 1);
-        subscription.setUserStatus("Active");
 
         subscriptionRepository.save(subscription);
 
