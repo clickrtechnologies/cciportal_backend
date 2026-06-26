@@ -1,21 +1,15 @@
 package com.moov.niger.cciportal.service;
 
 import com.moov.niger.cciportal.dto.SongResponse;
-import com.moov.niger.cciportal.repository.SongContentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class SongContentService {
-
-    @Autowired
-    private final SongContentRepository songContentRepository;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -87,6 +81,122 @@ public class SongContentService {
             String artist,
             String sort) {
 
-        return songContentRepository.searchCatalog(page, size, search, category, artist, sort);
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                tone_code,
+                tone_name,
+                category,
+                artist_name,
+                tone_url,
+                update_time
+            FROM tbl_tone_catalogue
+            WHERE 1=1
+            """);
+
+        StringBuilder countSql = new StringBuilder("""
+            SELECT COUNT(*)
+            FROM tbl_tone_catalogue
+            WHERE 1=1
+            """);
+
+        List<Object> params = new ArrayList<>();
+        List<Object> countParams = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+
+            sql.append("""
+                AND (
+                    LOWER(tone_name) LIKE ?
+                    OR LOWER(tone_code) LIKE ?
+                    OR LOWER(artist_name) LIKE ?
+                )
+                """);
+
+            countSql.append("""
+                AND (
+                    LOWER(tone_name) LIKE ?
+                    OR LOWER(tone_code) LIKE ?
+                    OR LOWER(artist_name) LIKE ?
+                )
+                """);
+
+            String keyword = "%" + search.toLowerCase() + "%";
+
+            params.add(keyword);
+            params.add(keyword);
+            params.add(keyword);
+
+            countParams.add(keyword);
+            countParams.add(keyword);
+            countParams.add(keyword);
+        }
+
+        if (category != null && !category.trim().isEmpty()) {
+
+            sql.append(" AND category = ? ");
+            countSql.append(" AND category = ? ");
+
+            params.add(category);
+            countParams.add(category);
+        }
+
+        if (artist != null && !artist.trim().isEmpty()) {
+
+            sql.append(" AND artist_name = ? ");
+            countSql.append(" AND artist_name = ? ");
+
+            params.add(artist);
+            countParams.add(artist);
+        }
+
+        if ("newest".equalsIgnoreCase(sort)) {
+
+            sql.append(" ORDER BY update_time DESC ");
+
+        } else if ("oldest".equalsIgnoreCase(sort)) {
+
+            sql.append(" ORDER BY update_time ASC ");
+
+        } else {
+
+            sql.append(" ORDER BY tone_code ASC ");
+        }
+
+        sql.append(" LIMIT ? OFFSET ? ");
+
+        params.add(size);
+        params.add(page * size);
+
+        List<SongResponse> songs = jdbcTemplate.query(
+                sql.toString(),
+                params.toArray(),
+                (rs, rowNum) -> {
+
+                    SongResponse dto = new SongResponse();
+
+                    dto.setToneCode(rs.getString("tone_code"));
+                    dto.setToneName(rs.getString("tone_name"));
+                    dto.setCategory(rs.getString("category"));
+                    dto.setArtistName(rs.getString("artist_name"));
+                    dto.setToneUrl(rs.getString("tone_url"));
+                    dto.setUpdateTime(rs.getTimestamp("update_time").toLocalDateTime());
+
+                    return dto;
+                });
+
+        Integer total = jdbcTemplate.queryForObject(
+                countSql.toString(),
+                Integer.class,
+                countParams.toArray());
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("content", songs);
+        response.put("page", page);
+        response.put("size", size);
+        response.put("totalElements", total);
+        response.put("totalPages", (int) Math.ceil((double) total / size));
+
+        return response;
     }
 }
