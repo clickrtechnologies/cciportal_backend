@@ -65,4 +65,18 @@ public class ApiController {
         return ResponseEntity.ok(songContentService.getArtistList());
     }
 
+    //search-tones
+    @GetMapping("/catalog/search")
+    public ResponseEntity<Map<String, Object>> searchCatalog(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String artist,
+            @RequestParam(defaultValue = "default") String sort) {
+
+        return ResponseEntity.ok(
+                songContentService.searchCatalog(page, size, search, category, artist, sort)
+        );
+    }
 }

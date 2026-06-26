@@ -1,15 +1,21 @@
 package com.moov.niger.cciportal.service;
 
 import com.moov.niger.cciportal.dto.SongResponse;
+import com.moov.niger.cciportal.repository.SongContentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class SongContentService {
+
+    @Autowired
+    private final SongContentRepository songContentRepository;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -70,5 +76,17 @@ public class SongContentService {
                 sql,
                 (rs, rowNum) -> rs.getString("artist_name")
         );
+    }
+
+
+    public Map<String, Object> searchCatalog(
+            int page,
+            int size,
+            String search,
+            String category,
+            String artist,
+            String sort) {
+
+        return songContentRepository.searchCatalog(page, size, search, category, artist, sort);
     }
 }
