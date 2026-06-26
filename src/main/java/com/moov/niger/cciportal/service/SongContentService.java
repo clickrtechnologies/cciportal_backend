@@ -40,4 +40,35 @@ public class SongContentService {
             return dto;
         });
     }
+
+
+    public List<String> getCategoryList() {
+        String sql = """
+                SELECT DISTINCT category
+                FROM tbl_tone_catalogue
+                WHERE category IS NOT NULL
+                  AND category <> ''
+                ORDER BY category
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getString("category")
+        );
+    }
+
+    public List<String> getArtistList() {
+        String sql = """
+                SELECT DISTINCT artist_name
+                FROM tbl_tone_catalogue
+                WHERE artist_name IS NOT NULL
+                  AND artist_name <> ''
+                ORDER BY artist_name
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getString("artist_name")
+        );
+    }
 }

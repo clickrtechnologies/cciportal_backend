@@ -53,4 +53,16 @@ public class ApiController {
                 subscriptionService.deactivate(msisdn));
     }
 
+    //list of categories
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategoryList() {
+        return ResponseEntity.ok(songContentService.getCategoryList());
+    }
+
+    //list of artist
+    @GetMapping("/artist")
+    public ResponseEntity<List<String>> getArtistList() {
+        return ResponseEntity.ok(songContentService.getArtistList());
+    }
+
 }
