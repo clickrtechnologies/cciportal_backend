@@ -67,6 +67,14 @@ public class BulkUploadService {
     public BulkPreviewResponse previewFile(MultipartFile file)
             throws Exception {
 
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Please upload a file.");
+        }
+        long maxSize = 10 * 1024 * 1024; //10MB
+
+        if (file.getSize() > maxSize) {
+            throw new RuntimeException("File size must not exceed 10 MB.");
+        }
         String fileName = file.getOriginalFilename();
 
         if (fileName == null) {
