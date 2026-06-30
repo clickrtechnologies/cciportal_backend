@@ -1,5 +1,6 @@
 package com.moov.niger.cciportal.controller;
 
+import com.moov.niger.cciportal.dto.request.BulkProcessRequest;
 import com.moov.niger.cciportal.dto.request.SetRbtRequest;
 import com.moov.niger.cciportal.dto.response.*;
 import com.moov.niger.cciportal.service.*;
@@ -102,6 +103,23 @@ public class ApiController {
 
         return ResponseEntity.ok(
                 bulkUploadService.previewFile(file));
+
+    }
+
+    //bulk process for activation
+    @PostMapping("/bulk/process")
+    public ResponseEntity<?> process(
+            @RequestBody BulkProcessRequest request){
+        return ResponseEntity.ok(
+                bulkUploadService.processBulk(request));
+
+    }
+
+    //history of bulk upload
+    @GetMapping("/bulk/history")
+    public ResponseEntity<?> history(){
+        return ResponseEntity.ok(
+                bulkUploadService.getHistory());
 
     }
 }

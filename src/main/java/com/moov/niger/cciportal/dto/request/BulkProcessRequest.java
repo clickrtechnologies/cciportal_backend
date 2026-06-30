@@ -1,16 +1,16 @@
-package com.moov.niger.cciportal.dto.response;
+package com.moov.niger.cciportal.dto.request;
+
 import com.moov.niger.cciportal.dto.BulkPreviewRecord;
 import lombok.Data;
-
 import java.util.List;
 
 @Data
-public class BulkPreviewResponse {
+public class BulkProcessRequest {
 
     private String previewId;
-    private int totalRecords;
-    private int validRecords;
-    private int invalidRecords;
+
+    private String fileName;
 
     private List<BulkPreviewRecord> records;
+
 }
