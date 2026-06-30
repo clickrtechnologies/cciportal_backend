@@ -1,14 +1,15 @@
 package com.moov.niger.cciportal.controller;
 
-import com.moov.niger.cciportal.dto.*;
+import com.moov.niger.cciportal.dto.request.SetRbtRequest;
+import com.moov.niger.cciportal.dto.response.*;
 import com.moov.niger.cciportal.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -92,4 +93,15 @@ public class ApiController {
         return bulkUploadService.downloadTemplate();
     }
 
+
+    //bulk preview
+    @PostMapping("/bulk/preview")
+    public ResponseEntity<BulkPreviewResponse> previewFile(
+            @RequestParam("file") MultipartFile file)
+            throws Exception {
+
+        return ResponseEntity.ok(
+                bulkUploadService.previewFile(file));
+
+    }
 }

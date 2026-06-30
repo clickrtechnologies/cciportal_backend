@@ -1,4 +1,4 @@
-package com.moov.niger.cciportal.dto;
+package com.moov.niger.cciportal.dto.request;
 
 import lombok.Data;
 

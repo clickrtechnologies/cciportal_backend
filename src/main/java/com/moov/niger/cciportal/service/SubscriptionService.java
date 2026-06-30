@@ -1,9 +1,9 @@
 package com.moov.niger.cciportal.service;
 
-import com.moov.niger.cciportal.dto.DeactivateResponse;
-import com.moov.niger.cciportal.dto.SetRbtRequest;
-import com.moov.niger.cciportal.dto.SetRbtResponse;
-import com.moov.niger.cciportal.dto.SubscriptionDetailsResponse;
+import com.moov.niger.cciportal.dto.response.DeactivateResponse;
+import com.moov.niger.cciportal.dto.request.SetRbtRequest;
+import com.moov.niger.cciportal.dto.response.SetRbtResponse;
+import com.moov.niger.cciportal.dto.response.SubscriptionDetailsResponse;
 import com.moov.niger.cciportal.model.Subscription;
 import com.moov.niger.cciportal.repository.SubscriptionRepository;
 import jakarta.persistence.EntityManager;

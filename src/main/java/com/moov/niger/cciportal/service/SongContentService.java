@@ -1,6 +1,6 @@
 package com.moov.niger.cciportal.service;
 
-import com.moov.niger.cciportal.dto.SongResponse;
+import com.moov.niger.cciportal.dto.response.SongResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
