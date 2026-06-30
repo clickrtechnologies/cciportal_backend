@@ -88,7 +88,7 @@ public class ApiController {
 
     //template for bulk activity
     @GetMapping("/template/download")
-    public ResponseEntity<Resource> downloadTemplate() throws IOException {
+    public ResponseEntity<Resource> downloadTemplate() {
         return bulkUploadService.downloadTemplate();
     }
 
