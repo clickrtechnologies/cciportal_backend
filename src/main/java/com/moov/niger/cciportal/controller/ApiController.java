@@ -117,9 +117,12 @@ public class ApiController {
 
     //history of bulk upload
     @GetMapping("/bulk/history")
-    public ResponseEntity<?> history(){
-        return ResponseEntity.ok(
-                bulkUploadService.getHistory());
+    public ResponseEntity<Map<String, Object>> history(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String previewId) {
 
+        return ResponseEntity.ok(
+                bulkUploadService.getHistory(page, size, previewId));
     }
 }

@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.data.domain.*;
 @Service
 public class BulkUploadService {
 
@@ -335,19 +336,29 @@ public class BulkUploadService {
 
 
     //history of bulk uploads
-    public List<BulkHistoryResponse> getHistory(){
-        List<BulkHistory> history =
-                bulkHistoryRepository.findAll(
-                        Sort.by(Sort.Direction.DESC,
-                                "transactionDate"));
+    public Map<String, Object> getHistory(int page,
+                                          int size,
+                                          String previewId) {
 
-        List<BulkHistoryResponse> response =
-                new ArrayList<>();
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "transactionDate"));
 
-        for(BulkHistory item : history){
+        Page<BulkHistory> historyPage;
 
-            BulkHistoryResponse dto =
-                    new BulkHistoryResponse();
+        if (previewId == null || previewId.trim().isEmpty()) {
+            historyPage = bulkHistoryRepository.findAll(pageable);
+        } else {
+            historyPage = bulkHistoryRepository
+                    .findByPreviewIdContainingIgnoreCase(previewId, pageable);
+        }
+
+        List<BulkHistoryResponse> response = new ArrayList<>();
+
+        for (BulkHistory item : historyPage.getContent()) {
+
+            BulkHistoryResponse dto = new BulkHistoryResponse();
 
             dto.setPreviewId(item.getPreviewId());
             dto.setFileName(item.getFileName());
@@ -355,11 +366,18 @@ public class BulkUploadService {
             dto.setSuccessRecords(item.getSuccessRecords());
             dto.setFailedRecords(item.getFailedRecords());
             dto.setStatus(item.getStatus());
-            dto.setTransactionDate(
-                    item.getTransactionDate().toString());
+            dto.setTransactionDate(item.getTransactionDate().toString());
 
             response.add(dto);
         }
-        return response;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", response);
+        result.put("page", page);
+        result.put("size", size);
+        result.put("totalElements", historyPage.getTotalElements());
+        result.put("totalPages", historyPage.getTotalPages());
+
+        return result;
     }
 }
