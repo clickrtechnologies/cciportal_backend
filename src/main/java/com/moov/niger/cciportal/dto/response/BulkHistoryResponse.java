@@ -11,6 +11,6 @@ public class BulkHistoryResponse {
     private Integer totalRecords;
     private Integer successRecords;
     private Integer failedRecords;
-    private Integer status;
+    private Byte status;
 
 }

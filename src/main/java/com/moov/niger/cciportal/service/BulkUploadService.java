@@ -302,13 +302,13 @@ public class BulkUploadService {
         history.setFailedRecords(failed);
 
         if(success==request.getRecords().size()){
-            history.setStatus(1);
+            history.setStatus((byte)1);
         }
         else if(success>0){
-            history.setStatus(15);
+            history.setStatus((byte)15);
         }
         else{
-            history.setStatus(0);
+            history.setStatus((byte)0);
         }
         bulkHistoryRepository.save(history);
         return "Bulk Activation Completed";

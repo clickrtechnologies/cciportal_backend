@@ -24,7 +24,7 @@ public class BulkHistory {
 
     private Integer failedRecords;
 
-    private Integer status;
+    private Byte status;
 
     private LocalDateTime transactionDate;
 
