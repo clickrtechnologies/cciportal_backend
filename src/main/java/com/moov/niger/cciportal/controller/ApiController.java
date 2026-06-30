@@ -4,8 +4,11 @@ import com.moov.niger.cciportal.dto.*;
 import com.moov.niger.cciportal.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -19,6 +22,9 @@ public class ApiController {
 
     @Autowired
     private SongContentService songContentService;
+
+    @Autowired
+    private BulkUploadService bulkUploadService;
 
     //user status details
     @GetMapping("/{msisdn}")
@@ -79,4 +85,11 @@ public class ApiController {
                 songContentService.searchCatalog(page, size, search, category, artist, sort)
         );
     }
+
+    //template for bulk activity
+    @GetMapping("/template/download")
+    public ResponseEntity<Resource> downloadTemplate() {
+        return bulkUploadService.downloadTemplate();
+    }
+
 }

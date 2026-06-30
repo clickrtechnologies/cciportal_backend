@@ -11,7 +11,6 @@ public class SongResponse {
     private String toneName;
     private String category;
     private LocalDateTime updateTime;
-
     private String artistName;
     private String toneUrl;
 }
