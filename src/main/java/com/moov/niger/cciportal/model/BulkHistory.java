@@ -14,18 +14,24 @@ public class BulkHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "preview_id")
     private String previewId;
 
+    @Column(name = "file_name")
     private String fileName;
 
+    @Column(name = "total_records")
     private Integer totalRecords;
 
+    @Column(name = "success_records")
     private Integer successRecords;
 
+    @Column(name = "failed_records")
     private Integer failedRecords;
 
+    @Column(name = "status")
     private Byte status;
 
+    @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
-
 }
