@@ -2,9 +2,11 @@ package com.moov.niger.cciportal.service;
 import com.moov.niger.cciportal.dto.request.BulkProcessRequest;
 import com.moov.niger.cciportal.dto.request.SetRbtRequest;
 import com.moov.niger.cciportal.model.BulkHistory;
+import com.moov.niger.cciportal.model.BulkHistoryDetail;
 import com.moov.niger.cciportal.model.SongContent;
-import com.moov.niger.cciportal.repository.BulkHistoryRepository;
-import com.moov.niger.cciportal.repository.SongContentRepository;
+import com.moov.niger.cciportal.model.Subscription;
+import com.moov.niger.cciportal.repository.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.*;
 import org.springframework.data.domain.Sort;
@@ -29,6 +31,12 @@ public class BulkUploadService {
 
     @Autowired
     private SubscriptionService subscriptionService;
+
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
+
+    @Autowired
+    private BulkHistoryDetailRepository bulkHistoryDetailRepository;
 
 
     //template download format
@@ -275,32 +283,79 @@ public class BulkUploadService {
 
         for (BulkPreviewRecord record : request.getRecords()) {
 
+            BulkHistoryDetail detail = new BulkHistoryDetail();
+
+            detail.setPreviewId(request.getPreviewId());
+            detail.setMobile(Long.parseLong(record.getMobile()));
+            detail.setToneId(record.getToneId());
+            detail.setToneName(record.getToneName());
+            detail.setArtistName(record.getArtistName());
+            detail.setPackagePlan(record.getPackagePlan());
+            detail.setTransactionDate(LocalDateTime.now());
+
+            // Skip invalid preview records
             if (!record.isValid()) {
+
+                detail.setStatus((byte) 0);
+                detail.setMessage(record.getMessage());
+
+                bulkHistoryDetailRepository.save(detail);
+
                 failed++;
                 continue;
             }
 
             try {
-                SetRbtRequest activate =
-                        new SetRbtRequest();
 
-                activate.setMsisdn(
-                        Long.parseLong(record.getMobile()));
+                SetRbtRequest activate = new SetRbtRequest();
 
+                activate.setMsisdn(Long.parseLong(record.getMobile()));
                 activate.setToneCode(record.getToneId());
-
                 activate.setToneName(record.getToneName());
-
-                activate.setPackName(
-                        convertPack(record.getPackagePlan()));
+                activate.setPackName(convertPack(record.getPackagePlan()));
 
                 subscriptionService.activate(activate);
-                success++;
-            }
-            catch (Exception e){
+
+                // Fetch latest subscription status
+                Subscription subscription = subscriptionRepository
+                        .findByMsisdn(Long.parseLong(record.getMobile()))
+                        .orElse(null);
+
+                if (subscription != null) {
+
+                    byte status = subscription.getStatus();
+
+                    detail.setStatus(status);
+
+                    if (status == 1) {
+                        detail.setMessage("Active");
+                        success++;
+                    } else if (status == 15) {
+                        detail.setMessage("Retry");
+                        failed++;
+                    } else {
+                        detail.setMessage("Inactive");
+                        failed++;
+                    }
+
+                } else {
+
+                    detail.setStatus((byte) 0);
+                    detail.setMessage("Subscription not found");
+                    failed++;
+                }
+
+            } catch (Exception e) {
+
+                detail.setStatus((byte) 0);
+                detail.setMessage(e.getMessage());
+
                 failed++;
             }
+
+            bulkHistoryDetailRepository.save(detail);
         }
+
         BulkHistory history = new BulkHistory();
 
         history.setPreviewId(request.getPreviewId());
@@ -310,20 +365,18 @@ public class BulkUploadService {
         history.setSuccessRecords(success);
         history.setFailedRecords(failed);
 
-        if(success==request.getRecords().size()){
-            history.setStatus((byte)1);
+        if (success == request.getRecords().size()) {
+            history.setStatus((byte) 1);
+        } else if (success > 0) {
+            history.setStatus((byte) 15);
+        } else {
+            history.setStatus((byte) 0);
         }
-        else if(success>0){
-            history.setStatus((byte)15);
-        }
-        else{
-            history.setStatus((byte)0);
-        }
+
         bulkHistoryRepository.save(history);
+
         return "Bulk Activation Completed";
-
     }
-
     private String convertPack(String pack){
         if(pack.equalsIgnoreCase("Daily")){
             return "TSUBD";
@@ -379,5 +432,84 @@ public class BulkUploadService {
         result.put("totalPages", historyPage.getTotalPages());
 
         return result;
+    }
+
+    //details of bulk by preview
+    public ResponseEntity<Resource> downloadReport(String previewId)
+            throws Exception {
+
+        List<BulkHistoryDetail> records =
+                bulkHistoryDetailRepository.findByPreviewId(previewId);
+
+        Workbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet("Bulk Report");
+
+        Row header = sheet.createRow(0);
+
+        header.createCell(0).setCellValue("Mobile Number");
+        header.createCell(1).setCellValue("Tone ID");
+        header.createCell(2).setCellValue("Tone Name");
+        header.createCell(3).setCellValue("Artist Name");
+        header.createCell(4).setCellValue("Package Plan");
+        header.createCell(5).setCellValue("Status");
+        header.createCell(6).setCellValue("Message");
+
+        int rowNo = 1;
+
+        for (BulkHistoryDetail item : records) {
+
+            Row row = sheet.createRow(rowNo++);
+
+            row.createCell(0).setCellValue(item.getMobile());
+
+            row.createCell(1).setCellValue(item.getToneId());
+
+            row.createCell(2).setCellValue(item.getToneName());
+
+            row.createCell(3).setCellValue(item.getArtistName());
+
+            row.createCell(4).setCellValue(item.getPackagePlan());
+                    String status;
+            switch (item.getStatus()) {
+                case 1:
+                    status = "SUCCESS";
+                    break;
+                case 15:
+                    status = "RETRY";
+                    break;
+                default:
+                    status = "FAILED";
+            }
+
+            row.createCell(5).setCellValue(status);
+            row.createCell(6).setCellValue(item.getMessage());
+
+        }
+
+        for (int i = 0; i <= 6; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        ByteArrayOutputStream out =
+                new ByteArrayOutputStream();
+
+        workbook.write(out);
+
+        workbook.close();
+
+        ByteArrayResource resource =
+                new ByteArrayResource(out.toByteArray());
+
+        return ResponseEntity.ok()
+
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" +
+                                previewId + "_Report.xlsx")
+
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentLength(resource.contentLength())
+                .body(resource);
     }
 }

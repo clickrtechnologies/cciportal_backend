@@ -96,7 +96,7 @@ public class SubscriptionService {
         procedure.setParameter("IN_ANI", request.getMsisdn());
         procedure.setParameter("IN_PID", request.getPackName());
         procedure.setParameter("IN_TONECODE", request.getToneCode());
-        procedure.setParameter("IN_REQMODE", "IVR");
+        procedure.setParameter("IN_REQMODE", "CCI");
         procedure.setParameter("IN_LANG", "fr");
         procedure.setParameter("IN_ACTION", "S");
         procedure.setParameter("IN_PROMONAME", "NA");

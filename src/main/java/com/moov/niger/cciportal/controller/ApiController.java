@@ -125,4 +125,13 @@ public class ApiController {
         return ResponseEntity.ok(
                 bulkUploadService.getHistory(page, size, previewId));
     }
+
+    //details of bulk by preview id
+    @GetMapping("/bulk/report/{previewId}")
+    public ResponseEntity<Resource> downloadReport(
+            @PathVariable String previewId) throws Exception {
+
+        return bulkUploadService.downloadReport(previewId);
+
+    }
 }

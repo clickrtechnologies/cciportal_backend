@@ -31,4 +31,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
             nativeQuery = true)
     List<Object[]> getSubscriptionDetails(
             @Param("msisdn") Long msisdn);
+
+
+    Optional<Subscription> findByMsisdn(Long msisdn);
 }
