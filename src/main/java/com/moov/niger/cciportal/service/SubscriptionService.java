@@ -110,7 +110,7 @@ public class SubscriptionService {
                                 new RuntimeException("Subscription not found"));
 
         subscription.setToneCode(request.getToneCode());
-
+        subscription.setPackName(request.getPackName());
         subscription.setBillingDate(now);
         subscription.setRenewDate(renewDate);
         subscription.setReqDate(now);
