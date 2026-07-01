@@ -18,6 +18,7 @@ import com.moov.niger.cciportal.dto.*;
 import org.apache.poi.ss.usermodel.*;
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import org.springframework.data.domain.*;
 @Service
@@ -507,6 +508,86 @@ public class BulkUploadService {
                         "attachment; filename=" +
                                 previewId + "_Report.xlsx")
 
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentLength(resource.contentLength())
+                .body(resource);
+    }
+
+    //report generation
+    public ResponseEntity<Resource> exportHistory() throws Exception {
+
+        List<BulkHistory> historyList =
+                bulkHistoryRepository.findAllByOrderByTransactionDateDesc();
+
+        Workbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet("Bulk History");
+
+        Row header = sheet.createRow(0);
+
+        header.createCell(0).setCellValue("Transaction Date");
+        header.createCell(1).setCellValue("Preview ID");
+        header.createCell(2).setCellValue("File Name");
+        header.createCell(3).setCellValue("Total Records");
+        header.createCell(4).setCellValue("Success Records");
+        header.createCell(5).setCellValue("Failed Records");
+        header.createCell(6).setCellValue("Status");
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+
+        int rowNum = 1;
+
+        for (BulkHistory item : historyList) {
+
+            Row row = sheet.createRow(rowNum++);
+
+            row.createCell(0).setCellValue(
+                    item.getTransactionDate().format(formatter));
+
+            row.createCell(1).setCellValue(item.getPreviewId());
+
+            row.createCell(2).setCellValue(item.getFileName());
+
+            row.createCell(3).setCellValue(item.getTotalRecords());
+
+            row.createCell(4).setCellValue(item.getSuccessRecords());
+
+            row.createCell(5).setCellValue(item.getFailedRecords());
+
+            String status;
+
+            switch (item.getStatus()) {
+                case 1:
+                    status = "COMPLETED";
+                    break;
+                case 15:
+                    status = "RETRY";
+                    break;
+                default:
+                    status = "FAILED";
+            }
+
+            row.createCell(6).setCellValue(status);
+        }
+
+        for (int i = 0; i <= 6; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        workbook.write(out);
+        workbook.close();
+
+        ByteArrayResource resource =
+                new ByteArrayResource(out.toByteArray());
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=Bulk_History.xlsx")
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .contentLength(resource.contentLength())

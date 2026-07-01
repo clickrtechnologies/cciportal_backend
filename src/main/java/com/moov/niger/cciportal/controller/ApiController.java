@@ -132,6 +132,11 @@ public class ApiController {
             @PathVariable String previewId) throws Exception {
 
         return bulkUploadService.downloadReport(previewId);
+    }
 
+    //report generation
+    @GetMapping("/bulk/history/export")
+    public ResponseEntity<Resource> exportHistory() throws Exception {
+        return bulkUploadService.exportHistory();
     }
 }
